@@ -1,0 +1,26 @@
+name = "voxtype-hal"
+version = "0.1.0"
+description = "Experimental HAL 9000 eye for Voxtype dictation. Red lens brightens with voice, ring arc shows volume, mini waveform inside."
+compatibility = "voxtype quickshell style packages"
+palette = "package"
+layout = "custom"
+qml_entry = "Hal.qml"
+
+[colors]
+accent = "#FF2D2D"
+background = "rgba(10, 10, 12, 0.92)"
+foreground = "#FFE9E9"
+muted = "rgba(255, 233, 233, 0.55)"
+success = "#FF6B6B"
+warning = "#FFB84D"
+error = "#FF2D2D"
+recording = "#FF2D2D"
+streaming = "#66C7FF"
+transcribing = "#F2CC4D"
+idle = "rgba(255, 233, 233, 0.6)"
+
+[frame]
+background = "none"
+border = "none"
+glow = false
+halo = false
