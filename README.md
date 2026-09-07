@@ -40,7 +40,34 @@ Re-running the installer is safe (idempotent) — it re-applies the same state.
 Requirements: `voxtype` with the Quickshell OSD backend (`qs` or
 `voxtype-osd-quickshell` on PATH). Tested with voxtype 1.0.x on Omarchy/Hyprland.
 
-## Uninstall (clean revert)
+## Usage
+
+Press your Voxtype dictation hotkey and speak. The eye appears
+bottom-center: the lens brightens with your voice, the ring shows your
+level, the pill shows elapsed time. Release the key and the pill flips to
+amber `Transcribing…` until the text lands at your cursor, then the eye
+fades away.
+
+## Configure
+
+Lens colors live in `voxtype-osd.toml` under `[colors]` (`accent`,
+`recording`, `foreground`…). Behavior lives in `Hal.qml` (plain QtQuick +
+Canvas — validate with `qmllint Hal.qml`). After editing, re-run
+`./install.sh` and restart voxtype:
+
+```bash
+./install.sh
+```
+
+To bring back the "recording stopped" desktop notification alongside the
+eye:
+
+```bash
+voxtype config set output.notification.on_recording_stop true
+systemctl --user restart voxtype
+```
+
+## Remove
 
 ```bash
 ./uninstall.sh [--keep-files] [--no-restart]
@@ -59,13 +86,8 @@ exactly as it was.
 | `voxtype-osd.toml` | Style package manifest (red palette, custom layout) |
 | `install.sh` | One-click install with backup |
 | `uninstall.sh` | One-click clean revert |
-
-## Customization
-
-Tweak colors in `voxtype-osd.toml` (`[colors]`), behavior in `Hal.qml`
-(it's plain QtQuick + Canvas — `qmllint Hal.qml` to validate), then
-re-run `./install.sh` and restart voxtype.
+| `LICENSE` | MIT |
 
 ## License
 
-MIT — same as Voxtype.
+MIT — see `LICENSE`.
