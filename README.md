@@ -84,14 +84,30 @@ This repo is also a valid Omarchy shell plugin
 
 ## Remove
 
+Full revert (eye gone, old waveform back exactly as it was). If you
+installed via `omarchy plugin add`, the plugin folder already contains
+this repo — run:
+
+```bash
+~/.config/omarchy/plugins/io.github.cyprusad.voxtype-hal/uninstall.sh
+omarchy plugin remove io.github.cyprusad.voxtype-hal --yes
+```
+
+From a repo checkout, it's just:
+
 ```bash
 ./uninstall.sh [--keep-files] [--no-restart]
 ```
 
-Restores the newest `config.toml.pre-hal-*` backup (falling back to the
-recorded original values, then to voxtype built-in defaults), removes the
-installed package copy, restarts voxtype. Your old waveform OSD comes back
-exactly as it was.
+What `uninstall.sh` does: restores the newest `config.toml.pre-hal-*`
+backup (falling back to the recorded original values, then to voxtype
+built-in defaults), removes the installed package copy, sets the
+opt-out sentinel so the service never re-applies, and restarts voxtype.
+
+Prefer no CLI? Remove the shell side in the Omarchy menu
+(Setup → Plugins → Remove), then run the `uninstall.sh` line above for
+the Voxtype side. Note: removing only the shell plugin is safe but not
+a revert — the eye keeps working until `uninstall.sh` runs.
 
 ## Files
 
