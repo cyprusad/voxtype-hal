@@ -56,6 +56,10 @@ mkdir -p "$TARGET_DIR"
 cp "$REPO_DIR/voxtype-osd.toml" "$REPO_DIR/Hal.qml" "$TARGET_DIR/"
 echo "Package installed to $TARGET_DIR"
 
+# Clear the opt-out sentinel so the bundled Omarchy service (if installed
+# as io.github.cyprusad.voxtype-hal) keeps the eye applied on shell start.
+rm -f "$(dirname "$TARGET_DIR")/.hal-disabled"
+
 # 2a. Full config backup (first install only is enough; always keep prior ones)
 if ! ls "${CONFIG}.pre-hal-"* >/dev/null 2>&1; then
   cp "$CONFIG" "${CONFIG}.pre-hal-$(date +%Y%m%d-%H%M%S)"
