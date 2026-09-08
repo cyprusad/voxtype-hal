@@ -72,13 +72,9 @@ if [ "$KEEP_FILES" = false ] && [ -d "$TARGET_DIR" ]; then
   fi
 fi
 
-# Opt out of auto-apply: the bundled Omarchy service
-# (io.github.cyprusad.vox-hal) checks this sentinel and stays idle
-# while it exists, so a manual revert survives shell restarts.
-# install.sh removes it again.
-mkdir -p "$(dirname "$TARGET_DIR")"
-touch "$(dirname "$TARGET_DIR")/.hal-disabled"
-echo "Auto-apply disabled (sentinel: $(dirname "$TARGET_DIR")/.hal-disabled)"
+# Remove any stale opt-out marker from older versions (nothing
+# auto-applies any more, so no sentinel is needed).
+rm -f "$(dirname "$TARGET_DIR")/.hal-disabled"
 
 if [ "$RESTART" = true ]; then
   systemctl --user restart voxtype

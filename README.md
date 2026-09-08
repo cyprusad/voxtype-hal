@@ -24,7 +24,8 @@ That backs up your `config.toml`, points the OSD at the eye, silences the
 Re-running it is safe. Needs `voxtype` 1.0.x with the Quickshell OSD
 backend (`qs` on PATH).
 
-Or as an Omarchy plugin (auto-applies on shell start):
+Or as an Omarchy plugin (adds the `◉` dot; the panel asks before
+changing anything):
 
 ```bash
 omarchy plugin add https://github.com/cyprusad/voxtype-hal.git --enable
@@ -73,8 +74,8 @@ Omarchy offers no uninstall hook.)
 ## Hack on it
 
 - `Hal.qml` — the eye (QtQuick + Canvas; check with `qmllint Hal.qml`)
-- `EyePanel.qml` / `BarWidget.qml` — bar dot + panel
-- `Service.qml` — headless auto-apply on shell start
+- `EyePanel.qml` / `BarWidget.qml` — bar dot + panel (opt-in apply,
+  hues, revert, paths)
 - `voxtype-osd.toml` — style package manifest
 - `manifest.json` — Omarchy plugin manifest (`io.github.cyprusad.vox-hal`)
 

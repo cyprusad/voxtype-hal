@@ -59,8 +59,9 @@ if [ ! -f "$TARGET_DIR/assets/lens.json" ]; then
 fi
 echo "Package installed to $TARGET_DIR"
 
-# Clear the opt-out sentinel so the bundled Omarchy service (if installed
-# as io.github.cyprusad.vox-hal) keeps the eye applied on shell start.
+# Remove any stale opt-out marker from older versions (no longer used —
+# nothing auto-applies any more; the eye activates only via this script
+# or the bar-widget panel).
 rm -f "$(dirname "$TARGET_DIR")/.hal-disabled"
 
 # 2a. Full config backup (first install only is enough; always keep prior ones)

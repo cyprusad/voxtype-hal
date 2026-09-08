@@ -6,9 +6,8 @@
   "author": "cyprusad",
   "license": "MIT",
   "description": "Replaces the Voxtype dictation waveform with a HAL 9000-style red eye: voice-reactive lens, volume arc, wave bars, and timer/Transcribing pill, all inside the eye.",
-  "kinds": ["service", "bar-widget"],
+  "kinds": ["bar-widget"],
   "entryPoints": {
-    "service": "Service.qml",
     "barWidget": "BarWidget.qml"
   },
   "barWidget": {

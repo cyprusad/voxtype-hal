@@ -20,8 +20,8 @@ Panel {
     property string lensMode: "hal"
     property string lensColor: "#FF2D2D"
     property string actionMsg: ""
-    readonly property string pluginDir: String(Qt.resolvedUrl("Panel.qml"))
-        .replace(/^file:\/\//, "").replace(/\/Panel\.qml$/, "")
+    readonly property string pluginDir: String(Qt.resolvedUrl("EyePanel.qml"))
+        .replace(/^file:\/\//, "").replace(/\/EyePanel\.qml$/, "")
     readonly property string backupGlob: "~/.config/voxtype/config.toml.pre-hal-*"
 
     function open() { root.controller.show(); }
@@ -131,7 +131,7 @@ Panel {
                     id: statusLine
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: root.halActive ? "Eye active — pick a hue." : "Eye not applied (Re-apply below)."
+                    text: root.halActive ? "Eye active — pick a hue." : "Default waveform is active."
                     color: root.barForeground
                     font.family: root.bar ? root.bar.fontFamily : Style.font.family
                     font.pixelSize: Style.font.body
@@ -139,6 +139,7 @@ Panel {
 
                 Grid {
                     id: swatchGrid
+                    visible: root.halActive
                     width: parent.width
                     columns: 5
                     spacing: 2
@@ -179,6 +180,7 @@ Panel {
                 }
 
                 Text {
+                    visible: root.halActive
                     width: parent.width
                     wrapMode: Text.WordWrap
                     font.pixelSize: 9
@@ -188,7 +190,45 @@ Panel {
                 }
 
                 Column {
+                    visible: !root.halActive
+                    width: parent.width
+                    spacing: 6
+
+                    Text {
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        font.pixelSize: Style.font.body
+                        color: root.barForeground
+                        text: "Replace the default dictation waveform with the HAL 9000 eye? Your current setup is backed up first — one click brings it back."
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: 30
+                        radius: 8
+                        color: "transparent"
+                        border.width: 1
+                        border.color: root.barForeground
+
+                        Text {
+                            anchors.centerIn: parent
+                            font.pixelSize: 11
+                            font.bold: true
+                            color: root.barForeground
+                            text: "Use HAL eye"
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.runScript("install.sh")
+                        }
+                    }
+                }
+
+                Column {
                     id: actionCol
+                    visible: root.halActive
                     width: parent.width
                     spacing: 6
 
