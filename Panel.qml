@@ -1,4 +1,4 @@
-// io.github.cyprusad.voxtype-hal — color picker panel.
+// io.github.cyprusad.voxtypehal — color picker panel.
 //
 // Swatches write assets/lens.json (consumed live by Hal.qml, no daemon
 // restart needed). This panel only changes the eye's hue — install and
@@ -11,7 +11,7 @@ import qs.Ui
 
 Panel {
     id: root
-    moduleName: "io.github.cyprusad.voxtype-hal"
+    moduleName: "io.github.cyprusad.voxtypehal"
     manageIpc: false
 
     property var anchorItem: null
@@ -19,6 +19,10 @@ Panel {
     property bool halActive: false
     property string lensMode: "hal"
     property string lensColor: "#FF2D2D"
+    property string actionMsg: ""
+    readonly property string pluginDir: String(Qt.resolvedUrl("Panel.qml"))
+        .replace(/^file:\/\//, "").replace(/\/Panel\.qml$/, "")
+    readonly property string backupGlob: "~/.config/voxtype/config.toml.pre-hal-*"
 
     function open() { root.controller.show(); }
     function close() { root.controller.hide(); }
@@ -64,8 +68,26 @@ Panel {
         running: false
         onExited: function(exitCode) {
             statusLine.text = exitCode === 0
-                ? (root.halActive ? "Eye updated — speak to see it." : "Saved. Re-apply the eye with ./install.sh to see it.")
+                ? (root.halActive ? "Eye updated — speak to see it." : "Saved. Re-apply the eye below to see it.")
                 : "Write failed (exit " + exitCode + ").";
+        }
+    }
+
+    function runScript(name) {
+        if (pluginDir.length === 0) return;
+        actionMsg = name === "install.sh" ? "Applying eye…" : "Reverting…";
+        scriptProcess.command = ["sh", pluginDir + "/" + name];
+        scriptProcess.running = true;
+    }
+
+    Process {
+        id: scriptProcess
+        running: false
+        onExited: function(exitCode) {
+            actionMsg = exitCode === 0 ? "Done." : "Failed (exit " + exitCode + ").";
+            if (hostWidget && typeof hostWidget.refreshStatus === "function") {
+                hostWidget.refreshStatus();
+            }
         }
     }
 
@@ -160,7 +182,53 @@ Panel {
                     font.pixelSize: 10
                     color: root.barForeground
                     opacity: 0.7
-                    text: "System follows your Omarchy theme. Full revert: ./uninstall.sh in the repo."
+                    text: "System follows your Omarchy theme."
+                }
+
+                Row {
+                    width: parent.width
+                    spacing: Style.space(8)
+
+                    Repeater {
+                        model: [
+                            { label: "Re-apply eye", script: "install.sh" },
+                            { label: "Revert to waveform", script: "uninstall.sh" }
+                        ]
+                        delegate: Rectangle {
+                            required property var modelData
+                            width: 128
+                            height: 28
+                            radius: 8
+                            color: "transparent"
+                            border.width: 1
+                            border.color: root.barForeground
+
+                            Text {
+                                anchors.centerIn: parent
+                                font.pixelSize: 11
+                                color: root.barForeground
+                                text: modelData.label
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.runScript(modelData.script)
+                            }
+                        }
+                    }
+                }
+
+                Text {
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    font.pixelSize: 10
+                    color: root.barForeground
+                    opacity: 0.7
+                    text: (root.actionMsg.length > 0 ? root.actionMsg + "\n" : "")
+                        + "Backup: ~/.config/voxtype/config.toml.pre-hal-*\n"
+                        + "Eye copy: ~/.config/voxtype/osd/voxtype-hal/\n"
+                        + "Full remove: uninstall.sh, then Setup → Plugins → Remove."
                 }
             }
         }

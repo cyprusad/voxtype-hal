@@ -1,4 +1,4 @@
-// io.github.cyprusad.voxtype-hal — headless service.
+// io.github.cyprusad.voxtypehal — headless service.
 //
 // Applies the HAL 9000 eye as the Voxtype dictation OSD exactly once:
 // copies Hal.qml + voxtype-osd.toml next to the voxtype config, points
@@ -15,7 +15,7 @@ import Quickshell.Io
 Item {
     id: root
 
-    readonly property string moduleName: "io.github.cyprusad.voxtype-hal"
+    readonly property string moduleName: "io.github.cyprusad.voxtypehal"
     property var shell: null
     property var manifest: null
 

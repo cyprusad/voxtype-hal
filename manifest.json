@@ -1,13 +1,21 @@
 {
   "schemaVersion": 1,
-  "id": "io.github.cyprusad.voxtype-hal",
+  "id": "io.github.cyprusad.voxtypehal",
   "name": "Voxtype HAL Eye",
   "version": "1.0.0",
   "author": "cyprusad",
   "license": "MIT",
   "description": "Replaces the Voxtype dictation waveform with a HAL 9000-style red eye: voice-reactive lens, volume arc, wave bars, and timer/Transcribing pill, all inside the eye.",
-  "kinds": ["service"],
+  "kinds": ["service", "bar-widget"],
   "entryPoints": {
-    "service": "Service.qml"
+    "service": "Service.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "HAL Eye",
+    "description": "Eye-dot status for the Voxtype HAL dictation OSD; click for hues, install/revert, and paths.",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
   }
 }
