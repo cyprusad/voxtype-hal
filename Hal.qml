@@ -80,7 +80,10 @@ Item {
     function resolveLensTarget() {
         var HAL_RED = {r: 255, g: 45, b: 45};
         if (lensMode === "theme") {
-            lensTarget = parseHexColor(colorFor("recording", "")) || parseHexColor(colorFor("accent", "")) || HAL_RED;
+            // Accent first: it is the theme's own hue (Catppuccin blue).
+            // The recording role falls back to a generic red that reads
+            // muddy once the gradient darkens it.
+            lensTarget = parseHexColor(colorFor("accent", "")) || parseHexColor(colorFor("recording", "")) || HAL_RED;
         } else if (lensMode === "custom") {
             lensTarget = parseHexColor(lensCustomHex) || HAL_RED;
         } else {

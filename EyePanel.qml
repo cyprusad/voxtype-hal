@@ -194,8 +194,8 @@ Panel {
 
                     Repeater {
                         model: [
-                            { label: "Re-apply HAL eye", script: "install.sh" },
-                            { label: "Revert to waveform", script: "uninstall.sh" }
+                            { label: "Apply HAL eye", script: "install.sh" },
+                            { label: "Revert to default", script: "uninstall.sh" }
                         ]
                         delegate: Rectangle {
                             required property var modelData
