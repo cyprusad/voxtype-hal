@@ -74,7 +74,8 @@ Item {
         return { r: Math.round(c.r * f), g: Math.round(c.g * f), b: Math.round(c.b * f) };
     }
     function rgbaStr(c, a) {
-        return "rgba(" + c.r + "," + c.g + "," + c.b + "," + a + ")";
+        // CanvasGradient requires integer components — smoothing leaves floats.
+        return "rgba(" + Math.round(c.r) + "," + Math.round(c.g) + "," + Math.round(c.b) + "," + a + ")";
     }
     function resolveLensTarget() {
         var HAL_RED = {r: 255, g: 45, b: 45};
