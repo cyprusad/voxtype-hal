@@ -44,7 +44,7 @@ Panel {
 
     // mode "" means: match current lens.json mode for the checkmark
     readonly property var swatches: [
-        { label: "HAL Red",  mode: "hal",    color: "#FF2D2D", dot: "#FF2D2D" },
+        { label: "HAL",       mode: "hal",    color: "#FF2D2D", dot: "#FF2D2D" },
         { label: "System",   mode: "theme",  color: "",        dot: "#8AB4FF" },
         { label: "Amber",    mode: "custom", color: "#FFB84D", dot: "#FFB84D" },
         { label: "Ice Blue", mode: "custom", color: "#66C7FF", dot: "#66C7FF" },
@@ -194,7 +194,7 @@ Panel {
 
                     Repeater {
                         model: [
-                            { label: "Re-apply eye", script: "install.sh" },
+                            { label: "Re-apply HAL eye", script: "install.sh" },
                             { label: "Revert to waveform", script: "uninstall.sh" }
                         ]
                         delegate: Rectangle {
