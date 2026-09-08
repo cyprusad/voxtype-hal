@@ -59,6 +59,24 @@ Canvas — validate with `qmllint Hal.qml`). After editing, re-run
 ./install.sh
 ```
 
+### Lens hue (live, no restart)
+
+Classic HAL red is the default. Switch any time — the eye picks it up
+within ~3s, even mid-dictation:
+
+```bash
+./lens.sh hal     # classic HAL red (default)
+./lens.sh system  # follow the active Omarchy theme
+./lens.sh amber|ice|violet|#RRGGBB
+```
+
+The choice is stored in
+`~/.config/voxtype/osd/voxtype-hal/assets/lens.json` and survives
+reinstalls. (A bar-widget color panel exists in this repo as
+`BarWidget.qml`/`Panel.qml`, but the shell currently refuses to load
+third-party widget files from this folder — `File name case mismatch`
+— so it stays parked until that loader quirk is understood.)
+
 To bring back the "recording stopped" desktop notification alongside the
 eye:
 
@@ -107,7 +125,28 @@ opt-out sentinel so the service never re-applies, and restarts voxtype.
 Prefer no CLI? Remove the shell side in the Omarchy menu
 (Setup → Plugins → Remove), then run the `uninstall.sh` line above for
 the Voxtype side. Note: removing only the shell plugin is safe but not
-a revert — the eye keeps working until `uninstall.sh` runs.
+a revert — the eye keeps working until `uninstall.sh` runs. There is no
+platform hook that could auto-run the revert on `plugin remove`
+(Remove just deletes the folder), so the two-step flow is the best
+Omarchy allows.
+
+## Where things live (manual reset)
+
+- **Your original UI:** `~/.config/voxtype/config.toml.pre-hal-*` —
+  a full timestamped copy of your config from before install (original
+  `[osd]` = gtk4 waveform, notifications on). `uninstall.sh` restores
+  the newest one. Manual reset without any script:
+  ```bash
+  cp ~/.config/voxtype/config.toml.pre-hal-* ~/.config/voxtype/config.toml
+  systemctl --user restart voxtype
+  ```
+  (If several backups exist, pick the newest; they are never deleted
+  automatically.)
+- **Installed eye copy:** `~/.config/voxtype/osd/voxtype-hal/`
+  (`Hal.qml`, `voxtype-osd.toml`, `assets/lens.json`, plus the recorded
+  original values in `.hal-backup.env`). Removed by `uninstall.sh`.
+- **Opt-out sentinel:** `~/.config/voxtype/osd/.hal-disabled` — while
+  present, the Omarchy service never re-applies the eye.
 
 ## Files
 
@@ -119,6 +158,8 @@ a revert — the eye keeps working until `uninstall.sh` runs.
 | `Service.qml` | Omarchy headless service: idempotent auto-apply on shell start |
 | `install.sh` | One-click install with backup |
 | `uninstall.sh` | One-click clean revert |
+| `lens.sh` | Live lens-hue switcher (no restart) |
+| `BarWidget.qml` / `Panel.qml` | Parked color-panel prototype (see Configure) |
 | `LICENSE` | MIT |
 
 ## License

@@ -51,9 +51,12 @@ get_or_unset() {  # $1 = key -> prints value or __UNSET__
 
 echo "== voxtype-hal: installing HAL eye OSD =="
 
-# 1. Install the style package
-mkdir -p "$TARGET_DIR"
+# 1. Install the style package (never clobber the user's lens color choice)
+mkdir -p "$TARGET_DIR/assets"
 cp "$REPO_DIR/voxtype-osd.toml" "$REPO_DIR/Hal.qml" "$TARGET_DIR/"
+if [ ! -f "$TARGET_DIR/assets/lens.json" ]; then
+  cp "$REPO_DIR/assets/lens.json" "$TARGET_DIR/assets/lens.json"
+fi
 echo "Package installed to $TARGET_DIR"
 
 # Clear the opt-out sentinel so the bundled Omarchy service (if installed
@@ -82,7 +85,7 @@ echo "Original OSD values recorded in $BACKUP_ENV"
 # 3. Apply the HAL configuration
 voxtype config set osd.frontend quickshell
 voxtype config set osd.style "$TARGET_DIR"
-voxtype config set osd.palette package
+voxtype config set osd.palette omarchy
 voxtype config set osd.layout custom
 voxtype config set output.notification.on_recording_stop false
 

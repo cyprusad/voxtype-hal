@@ -1,5 +1,8 @@
 // Voxtype HAL-9000 experimental OSD.
-// Everything lives inside the eye: red lens brightens with voice energy,
+// Everything lives inside the eye: lens brightens with voice energy
+// (classic HAL red by default; "theme" follows the Omarchy theme,
+// "custom" uses a fixed hex — picked from the bar-widget panel and
+// stored in assets/lens.json),
 // surrounding arc = volume level (with held-peak tick),
 // mini bars at the bottom of the lens = scrolling sound waves,
 // timer pill at the top of the lens = elapsed dictation time.
@@ -9,6 +12,8 @@
 //   property string daemonState, property var audio (frameReceived signal),
 //   property var theme (color(role, fallback)), property var recipe, assetRoot.
 import QtQuick
+import Quickshell
+import Quickshell.Io
 
 Item {
     id: root
@@ -42,6 +47,69 @@ Item {
     function fmtTime(s) {
         s = Math.max(0, Math.floor(s));
         return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2);
+    }
+
+    // Lens color modes, picked from the bar-widget panel and stored in
+    // assets/lens.json (no daemon restart needed to switch):
+    //   "hal"    classic HAL red (default)
+    //   "theme"  follows the Omarchy theme (recording role, else accent)
+    //   "custom" fixed hex from lens.json ("color")
+    property string lensMode: "hal"
+    property string lensCustomHex: "#FF2D2D"
+    property var lensRgb: ({r: 255, g: 45, b: 45})
+    property var lensTarget: ({r: 255, g: 45, b: 45})
+
+    function parseHexColor(s) {
+        var m = /^#([0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.exec(String(s || ""));
+        if (!m) return null;
+        var h = m[1];
+        if (h.length === 8) h = h.slice(2);  // drop #AARRGGBB alpha
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16) };
+    }
+    function mixRgb(a, b, t) {
+        return { r: Math.round(a.r + (b.r - a.r) * t), g: Math.round(a.g + (b.g - a.g) * t), b: Math.round(a.b + (b.b - a.b) * t) };
+    }
+    function scaleRgb(c, f) {
+        return { r: Math.round(c.r * f), g: Math.round(c.g * f), b: Math.round(c.b * f) };
+    }
+    function rgbaStr(c, a) {
+        return "rgba(" + c.r + "," + c.g + "," + c.b + "," + a + ")";
+    }
+    function resolveLensTarget() {
+        var HAL_RED = {r: 255, g: 45, b: 45};
+        if (lensMode === "theme") {
+            lensTarget = parseHexColor(colorFor("recording", "")) || parseHexColor(colorFor("accent", "")) || HAL_RED;
+        } else if (lensMode === "custom") {
+            lensTarget = parseHexColor(lensCustomHex) || HAL_RED;
+        } else {
+            lensTarget = HAL_RED;
+        }
+    }
+    function applyLensJson(raw) {
+        try {
+            var o = JSON.parse(raw || "{}");
+            var m = String(o.mode || "hal");
+            if (m !== "hal" && m !== "theme" && m !== "custom") m = "hal";
+            var hx = String(o.color || "#FF2D2D");
+            if (m !== lensMode || hx !== lensCustomHex) {
+                lensMode = m;
+                lensCustomHex = hx;
+                console.log("[voxtype-hal] lens mode: " + m + " " + hx);
+            }
+            resolveLensTarget();  // re-resolve every time: system theme may have changed
+        } catch (e) {}
+    }
+
+    // Watches the panel's color choice; instant updates, no polling.
+    FileView {
+        id: lensFile
+        path: root.assetRoot && root.assetRoot.length > 0 ? root.assetRoot + "/lens.json" : ""
+        watchChanges: true
+        printErrors: false
+        onLoaded: root.applyLensJson(text())
+        onLoadFailed: { /* keep current hue */ }
+        onFileChanged: reload()
     }
 
     function colorFor(role, fallback) {
@@ -115,6 +183,12 @@ Item {
             root.energy += (targetE - root.energy) * k;
             var kp = 1 - Math.exp(-14.0 * dt);
             root.smoothPeak += ((root.isRecording ? root.peak : 0) - root.smoothPeak) * kp;
+            var kl = 1 - Math.exp(-6.0 * dt);
+            root.lensRgb = {
+                r: root.lensRgb.r + (root.lensTarget.r - root.lensRgb.r) * kl,
+                g: root.lensRgb.g + (root.lensTarget.g - root.lensRgb.g) * kl,
+                b: root.lensRgb.b + (root.lensTarget.b - root.lensRgb.b) * kl
+            };
             if (root.isRecording && root.recStartMs > 0) {
                 root.elapsedSecs = (now - root.recStartMs) / 1000;
             }
@@ -157,14 +231,14 @@ Item {
                 ctx.beginPath(); ctx.arc(cx, cy, R + 12, 0, Math.PI * 2);
                 ctx.fillStyle = "rgba(0,0,0,0.45)"; ctx.fill();
 
-                // Outer glow when speaking (red halo = HAL is listening)
+                // Outer glow when speaking (lens halo = HAL is listening)
                 if (root.isRecording) {
                     var glowR = R + 26 + e * 18;
                     var glow = ctx.createRadialGradient(cx, cy, R * 0.5, cx, cy, glowR);
                     var ga = 0.10 + e * 0.30;
-                    glow.addColorStop(0, "rgba(255,45,45," + ga.toFixed(3) + ")");
-                    glow.addColorStop(0.7, "rgba(255,45,45," + (ga * 0.35).toFixed(3) + ")");
-                    glow.addColorStop(1, "rgba(255,45,45,0)");
+                    glow.addColorStop(0, root.rgbaStr(root.lensRgb, ga.toFixed(3)));
+                    glow.addColorStop(0.7, root.rgbaStr(root.lensRgb, (ga * 0.35).toFixed(3)));
+                    glow.addColorStop(1, root.rgbaStr(root.lensRgb, 0));
                     ctx.fillStyle = glow;
                     ctx.beginPath(); ctx.arc(cx, cy, glowR, 0, Math.PI * 2); ctx.fill();
                 }
@@ -180,15 +254,15 @@ Item {
                 ctx.beginPath(); ctx.arc(cx, cy, rBezel, 0, Math.PI * 2);
                 ctx.fillStyle = "#000000"; ctx.fill();
 
-                // Red lens with voice-driven brightness
+                // Lens with voice-driven brightness, in the picked hue
+                var L = root.lensRgb;
                 var bright = root.isTranscribing ? 0.45 + 0.15 * breath
                     : 0.34 + e * 0.66;
                 var g = ctx.createRadialGradient(cx - 6, cy - 8, 2, cx, cy, rLens);
-                var c = Math.round(120 + 135 * bright);
-                g.addColorStop(0, "rgba(255," + Math.round(90 + 80 * bright) + "," + Math.round(90 + 60 * bright) + ",1)");
-                g.addColorStop(0.35, "rgba(" + c + ",18,18,1)");
-                g.addColorStop(0.8, "rgba(90,4,4,1)");
-                g.addColorStop(1, "rgba(30,0,0,1)");
+                g.addColorStop(0, root.rgbaStr(root.mixRgb(L, {r: 255, g: 255, b: 255}, 0.45 + 0.35 * bright), 1));
+                g.addColorStop(0.35, root.rgbaStr(root.scaleRgb(L, 0.45 + 0.55 * bright), 1));
+                g.addColorStop(0.8, root.rgbaStr(root.scaleRgb(L, 0.35), 1));
+                g.addColorStop(1, root.rgbaStr(root.scaleRgb(L, 0.16), 1));
                 ctx.beginPath(); ctx.arc(cx, cy, rLens, 0, Math.PI * 2);
                 ctx.fillStyle = g; ctx.fill();
 
@@ -202,15 +276,15 @@ Item {
                 ctx.fill();
                 ctx.restore();
 
-                // Hot core: grows + whitens with loudness
+                // Hot core: grows + whitens with loudness, tinted by lens hue
                 var coreR = 5 + e * 11 + (root.isTranscribing ? breath * 3 : 0);
                 var core = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 2.2);
                 core.addColorStop(0, "rgba(255,240,240,0.95)");
-                core.addColorStop(0.4, "rgba(255,120,120," + (0.55 + e * 0.4).toFixed(3) + ")");
-                core.addColorStop(1, "rgba(255,40,40,0)");
+                core.addColorStop(0.4, root.rgbaStr(L, (0.55 + e * 0.4).toFixed(3)));
+                core.addColorStop(1, root.rgbaStr(L, 0));
                 ctx.fillStyle = core;
                 ctx.beginPath(); ctx.arc(cx, cy, coreR * 2.2, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = "rgba(255,225,225," + (0.75 + e * 0.25).toFixed(3) + ")";
+                ctx.fillStyle = root.rgbaStr(root.mixRgb({r: 255, g: 255, b: 255}, L, 0.18), (0.75 + e * 0.25).toFixed(3));
                 ctx.beginPath(); ctx.arc(cx, cy, Math.max(2.5, coreR * 0.55), 0, Math.PI * 2); ctx.fill();
 
                 // ---- Volume arc (level meter around the lens) ----
@@ -231,7 +305,7 @@ Item {
                 // live level: red -> amber -> white as it gets hot
                 if (liveFill > 0.003) {
                     var lg = ctx.createLinearGradient(cx - arcR, cy, cx + arcR, cy);
-                    lg.addColorStop(0, "#ff2d2d");
+                    lg.addColorStop(0, root.rgbaStr(L, 1));
                     lg.addColorStop(0.72, "#ffb84d");
                     lg.addColorStop(1, "#ffffff");
                     ctx.strokeStyle = lg;

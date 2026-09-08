@@ -2,7 +2,7 @@ name = "voxtype-hal"
 version = "0.1.0"
 description = "Experimental HAL 9000 eye for Voxtype dictation. Red lens brightens with voice, ring arc shows volume, mini waveform inside."
 compatibility = "voxtype quickshell style packages"
-palette = "package"
+palette = "omarchy"
 layout = "custom"
 qml_entry = "Hal.qml"
 
