@@ -1,4 +1,4 @@
-// io.github.cyprusad.voxtypehal — bar widget entry point.
+// io.github.cyprusad.vox-hal — bar widget entry point.
 //
 // A small eye dot for the bar: HAL red while the eye is the active OSD,
 // grey otherwise. Click toggles the color panel. Status re-checked on
@@ -11,7 +11,7 @@ import qs.Ui
 
 BarWidget {
     id: root
-    moduleName: "io.github.cyprusad.voxtypehal"
+    moduleName: "io.github.cyprusad.vox-hal"
 
     readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
     readonly property bool popoutSwitchClosing: panelLoader.item ? panelLoader.item.popoutSwitchClosing === true : false
@@ -52,7 +52,7 @@ BarWidget {
     Loader {
         id: panelLoader
         active: true
-        source: Qt.resolvedUrl("Panel.qml")
+        source: Qt.resolvedUrl("EyePanel.qml")
         visible: false
         onLoaded: {
             root.injectPanel();

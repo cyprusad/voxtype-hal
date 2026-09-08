@@ -90,14 +90,14 @@ systemctl --user restart voxtype
 This repo is also a valid Omarchy shell plugin
 (`omarchy plugin validate` clean):
 
-- **ID:** `io.github.cyprusad.voxtypehal` (`service` kind)
+- **ID:** `io.github.cyprusad.vox-hal` (`service` kind)
 - Install: `omarchy plugin add <repo-url> --enable`
 - The service auto-applies the eye on shell start (idempotent —
   no-op when already active, verified in the shell log as
   `[voxtype-hal] ALREADY`).
 - It respects the opt-out sentinel `~/.config/voxtype/osd/.hal-disabled`
   (created by `./uninstall.sh`, cleared by `./install.sh`).
-- `omarchy plugin remove io.github.cyprusad.voxtypehal` stops future
+- `omarchy plugin remove io.github.cyprusad.vox-hal` stops future
   auto-apply; run `./uninstall.sh` for the full Voxtype revert.
 
 ## Remove
@@ -107,8 +107,8 @@ installed via `omarchy plugin add`, the plugin folder already contains
 this repo — run:
 
 ```bash
-~/.config/omarchy/plugins/io.github.cyprusad.voxtypehal/uninstall.sh
-omarchy plugin remove io.github.cyprusad.voxtypehal --yes
+~/.config/omarchy/plugins/io.github.cyprusad.vox-hal/uninstall.sh
+omarchy plugin remove io.github.cyprusad.vox-hal --yes
 ```
 
 From a repo checkout, it's just:
@@ -154,7 +154,7 @@ Omarchy allows.
 |------|---------|
 | `Hal.qml` | The eye. Custom QML, runs trusted inside the voxtype OSD host |
 | `voxtype-osd.toml` | Style package manifest (red palette, custom layout) |
-| `manifest.json` | Omarchy plugin manifest (`io.github.cyprusad.voxtypehal`) |
+| `manifest.json` | Omarchy plugin manifest (`io.github.cyprusad.vox-hal`) |
 | `Service.qml` | Omarchy headless service: idempotent auto-apply on shell start |
 | `install.sh` | One-click install with backup |
 | `uninstall.sh` | One-click clean revert |

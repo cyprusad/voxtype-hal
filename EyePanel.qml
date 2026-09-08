@@ -1,4 +1,4 @@
-// io.github.cyprusad.voxtypehal — color picker panel.
+// io.github.cyprusad.vox-hal — color picker panel.
 //
 // Swatches write assets/lens.json (consumed live by Hal.qml, no daemon
 // restart needed). This panel only changes the eye's hue — install and
@@ -11,7 +11,7 @@ import qs.Ui
 
 Panel {
     id: root
-    moduleName: "io.github.cyprusad.voxtypehal"
+    moduleName: "io.github.cyprusad.vox-hal"
     manageIpc: false
 
     property var anchorItem: null
@@ -103,7 +103,7 @@ Panel {
         bar: root.bar
         open: root.opened
         focusTarget: keyCatcher
-        contentWidth: panel.fittedContentWidth(Style.space(280))
+        contentWidth: panel.fittedContentWidth(Style.space(232))
         contentHeight: panel.fittedContentHeight(content.implicitHeight)
 
         PanelKeyCatcher {
@@ -112,10 +112,11 @@ Panel {
             onCloseRequested: root.close()
             onTabRequested: function(direction) { root.switchPanel(direction); }
 
+            // Content always matches the real fitted panel width.
             Column {
                 id: content
                 width: parent.width
-                spacing: Style.space(8)
+                spacing: 8
 
                 Text {
                     width: parent.width
@@ -130,28 +131,29 @@ Panel {
                     id: statusLine
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: root.halActive ? "Eye active — pick a hue." : "Eye not applied (./install.sh to enable)."
+                    text: root.halActive ? "Eye active — pick a hue." : "Eye not applied (Re-apply below)."
                     color: root.barForeground
                     font.family: root.bar ? root.bar.fontFamily : Style.font.family
                     font.pixelSize: Style.font.body
                 }
 
                 Grid {
+                    id: swatchGrid
                     width: parent.width
                     columns: 5
-                    spacing: Style.space(8)
+                    spacing: 2
 
                     Repeater {
                         model: root.swatches
                         delegate: Column {
                             required property var modelData
                             spacing: 2
-                            width: 44
+                            width: Math.floor(swatchGrid.width / 5)
 
                             Rectangle {
-                                width: 28
-                                height: 28
-                                radius: 14
+                                width: 26
+                                height: 26
+                                radius: 13
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 color: modelData.dot
                                 border.width: root.selected(modelData) ? 2 : 1
@@ -167,7 +169,7 @@ Panel {
                             Text {
                                 width: parent.width
                                 horizontalAlignment: Text.AlignHCenter
-                                font.pixelSize: 10
+                                font.pixelSize: 9
                                 color: root.barForeground
                                 text: modelData.label
                                 elide: Text.ElideRight
@@ -179,15 +181,16 @@ Panel {
                 Text {
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    font.pixelSize: 10
+                    font.pixelSize: 9
                     color: root.barForeground
                     opacity: 0.7
                     text: "System follows your Omarchy theme."
                 }
 
-                Row {
+                Column {
+                    id: actionCol
                     width: parent.width
-                    spacing: Style.space(8)
+                    spacing: 6
 
                     Repeater {
                         model: [
@@ -196,8 +199,8 @@ Panel {
                         ]
                         delegate: Rectangle {
                             required property var modelData
-                            width: 128
-                            height: 28
+                            width: actionCol.width
+                            height: 30
                             radius: 8
                             color: "transparent"
                             border.width: 1
@@ -221,13 +224,13 @@ Panel {
 
                 Text {
                     width: parent.width
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: 10
+                    wrapMode: Text.WrapAnywhere
+                    font.pixelSize: 9
                     color: root.barForeground
                     opacity: 0.7
                     text: (root.actionMsg.length > 0 ? root.actionMsg + "\n" : "")
-                        + "Backup: ~/.config/voxtype/config.toml.pre-hal-*\n"
-                        + "Eye copy: ~/.config/voxtype/osd/voxtype-hal/\n"
+                        + "Backup:\n~/.config/voxtype/config.toml.pre-hal-*\n"
+                        + "Eye copy:\n~/.config/voxtype/osd/voxtype-hal/\n"
                         + "Full remove: uninstall.sh, then Setup → Plugins → Remove."
                 }
             }

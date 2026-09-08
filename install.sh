@@ -60,7 +60,7 @@ fi
 echo "Package installed to $TARGET_DIR"
 
 # Clear the opt-out sentinel so the bundled Omarchy service (if installed
-# as io.github.cyprusad.voxtypehal) keeps the eye applied on shell start.
+# as io.github.cyprusad.vox-hal) keeps the eye applied on shell start.
 rm -f "$(dirname "$TARGET_DIR")/.hal-disabled"
 
 # 2a. Full config backup (first install only is enough; always keep prior ones)

@@ -73,7 +73,7 @@ if [ "$KEEP_FILES" = false ] && [ -d "$TARGET_DIR" ]; then
 fi
 
 # Opt out of auto-apply: the bundled Omarchy service
-# (io.github.cyprusad.voxtypehal) checks this sentinel and stays idle
+# (io.github.cyprusad.vox-hal) checks this sentinel and stays idle
 # while it exists, so a manual revert survives shell restarts.
 # install.sh removes it again.
 mkdir -p "$(dirname "$TARGET_DIR")"
