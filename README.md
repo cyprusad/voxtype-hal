@@ -1,70 +1,44 @@
 # voxtype-hal — HAL 9000 eye for Voxtype dictation
 
-A shareable Voxtype Quickshell style package that replaces the default
-waveform bar with a **HAL 9000-style red eye** while dictating.
+Replaces the default waveform bar with a **HAL 9000-style red eye** while
+dictating. Everything lives inside the eye — nothing floats over your
+desktop:
 
-Everything lives inside the eye — nothing floats over your desktop:
-
-- **Red lens** brightens with voice energy, hot white core when you're loud
-- **Arc ring** around the lens = live volume level, with a held-peak tick
-- **Mini bars** in the lower lens = scrolling sound-wave history
-- **Status pill** at the top of the lens = elapsed time while speaking,
-  flips to amber `Transcribing…` while the model works
-- Soft halo glow + dark scrim so it separates from busy windows behind it
+- **Lens** brightens with your voice, hot core when you're loud
+- **Arc ring** = live volume level, with a held-peak tick
+- **Mini bars** = scrolling sound-wave history
+- **Pill** = elapsed time while speaking, flips to amber `Transcribing…`
+  while the model works
 
 ![HAL eye OSD](assets/preview.png)
 
-## Install (one command)
+## Install
 
 ```bash
-git clone <this-repo> ~/.config/voxtype/osd/voxtype-hal-src
+git clone https://github.com/cyprusad/voxtype-hal.git ~/.config/voxtype/osd/voxtype-hal-src
 ~/.config/voxtype/osd/voxtype-hal-src/install.sh
 ```
 
-Or from a checkout anywhere:
+That backs up your `config.toml`, points the OSD at the eye, silences the
+"recording stopped" popup (the eye shows state now), and restarts voxtype.
+Re-running it is safe. Needs `voxtype` 1.0.x with the Quickshell OSD
+backend (`qs` on PATH).
+
+Or as an Omarchy plugin (auto-applies on shell start):
 
 ```bash
-./install.sh [--target DIR] [--no-restart]
+omarchy plugin add https://github.com/cyprusad/voxtype-hal.git --enable
 ```
 
-The installer:
+## Use
 
-1. Copies the style package into `~/.config/voxtype/osd/voxtype-hal/`
-2. Backs up `~/.config/voxtype/config.toml` to
-   `config.toml.pre-hal-<timestamp>` (kept forever, never overwritten)
-   and records the exact original OSD values
-3. Switches `[osd]` to `quickshell` + this package and silences the
-   "recording stopped" desktop notification (the eye shows state now)
-4. Restarts voxtype and verifies the daemon is idle-ready
+Press your dictation hotkey and speak. Release, and the pill flips to
+`Transcribing…` until the text lands. Click the `◉` dot in your bar for
+hues, re-apply/revert buttons, and paths.
 
-Re-running the installer is safe (idempotent) — it re-applies the same state.
+## Color
 
-Requirements: `voxtype` with the Quickshell OSD backend (`qs` or
-`voxtype-osd-quickshell` on PATH). Tested with voxtype 1.0.x on Omarchy/Hyprland.
-
-## Usage
-
-Press your Voxtype dictation hotkey and speak. The eye appears
-bottom-center: the lens brightens with your voice, the ring shows your
-level, the pill shows elapsed time. Release the key and the pill flips to
-amber `Transcribing…` until the text lands at your cursor, then the eye
-fades away.
-
-## Configure
-
-Lens colors live in `voxtype-osd.toml` under `[colors]` (`accent`,
-`recording`, `foreground`…). Behavior lives in `Hal.qml` (plain QtQuick +
-Canvas — validate with `qmllint Hal.qml`). After editing, re-run
-`./install.sh` and restart voxtype:
-
-```bash
-./install.sh
-```
-
-### Lens hue (live, no restart)
-
-Classic HAL red is the default. Switch any time — the eye picks it up
-within ~3s, even mid-dictation:
+Classic HAL red by default. Change any time — no restart, applies live:
 
 ```bash
 ./lens.sh hal     # classic HAL red (default)
@@ -72,97 +46,37 @@ within ~3s, even mid-dictation:
 ./lens.sh amber|ice|violet|#RRGGBB
 ```
 
-The choice is stored in
-`~/.config/voxtype/osd/voxtype-hal/assets/lens.json` and survives
-reinstalls. (A bar-widget color panel exists in this repo as
-`BarWidget.qml`/`Panel.qml`, but the shell currently refuses to load
-third-party widget files from this folder — `File name case mismatch`
-— so it stays parked until that loader quirk is understood.)
-
-To bring back the "recording stopped" desktop notification alongside the
-eye:
-
-```bash
-voxtype config set output.notification.on_recording_stop true
-systemctl --user restart voxtype
-```
-
-## Omarchy plugin
-
-This repo is also a valid Omarchy shell plugin
-(`omarchy plugin validate` clean):
-
-- **ID:** `io.github.cyprusad.vox-hal` (`service` kind)
-- Install: `omarchy plugin add <repo-url> --enable`
-- The service auto-applies the eye on shell start (idempotent —
-  no-op when already active, verified in the shell log as
-  `[voxtype-hal] ALREADY`).
-- It respects the opt-out sentinel `~/.config/voxtype/osd/.hal-disabled`
-  (created by `./uninstall.sh`, cleared by `./install.sh`).
-- `omarchy plugin remove io.github.cyprusad.vox-hal` stops future
-  auto-apply; run `./uninstall.sh` for the full Voxtype revert.
-
 ## Remove
 
-Full revert (eye gone, old waveform back exactly as it was). If you
-installed via `omarchy plugin add`, the plugin folder already contains
-this repo — run:
-
 ```bash
-~/.config/omarchy/plugins/io.github.cyprusad.vox-hal/uninstall.sh
+./uninstall.sh
 omarchy plugin remove io.github.cyprusad.vox-hal --yes
 ```
 
-From a repo checkout, it's just:
+(The first line restores your exact old setup; the second drops the shell
+plugin. No CLI? Do the second step in the Omarchy menu under
+Setup → Plugins → Remove. Note: removing only the shell plugin leaves a
+working eye behind — `uninstall.sh` is what reverts Voxtype, because
+Omarchy offers no uninstall hook.)
 
-```bash
-./uninstall.sh [--keep-files] [--no-restart]
-```
+## Where things live
 
-What `uninstall.sh` does: restores the newest `config.toml.pre-hal-*`
-backup (falling back to the recorded original values, then to voxtype
-built-in defaults), removes the installed package copy, sets the
-opt-out sentinel so the service never re-applies, and restarts voxtype.
-
-Prefer no CLI? Remove the shell side in the Omarchy menu
-(Setup → Plugins → Remove), then run the `uninstall.sh` line above for
-the Voxtype side. Note: removing only the shell plugin is safe but not
-a revert — the eye keeps working until `uninstall.sh` runs. There is no
-platform hook that could auto-run the revert on `plugin remove`
-(Remove just deletes the folder), so the two-step flow is the best
-Omarchy allows.
-
-## Where things live (manual reset)
-
-- **Your original UI:** `~/.config/voxtype/config.toml.pre-hal-*` —
-  a full timestamped copy of your config from before install (original
-  `[osd]` = gtk4 waveform, notifications on). `uninstall.sh` restores
-  the newest one. Manual reset without any script:
+- **Your original setup:** `~/.config/voxtype/config.toml.pre-hal-*`
+  (full backup, kept forever). Manual reset:
   ```bash
   cp ~/.config/voxtype/config.toml.pre-hal-* ~/.config/voxtype/config.toml
   systemctl --user restart voxtype
   ```
-  (If several backups exist, pick the newest; they are never deleted
-  automatically.)
-- **Installed eye copy:** `~/.config/voxtype/osd/voxtype-hal/`
-  (`Hal.qml`, `voxtype-osd.toml`, `assets/lens.json`, plus the recorded
-  original values in `.hal-backup.env`). Removed by `uninstall.sh`.
-- **Opt-out sentinel:** `~/.config/voxtype/osd/.hal-disabled` — while
-  present, the Omarchy service never re-applies the eye.
+- **Installed eye:** `~/.config/voxtype/osd/voxtype-hal/`
+- **Hue choice:** `~/.config/voxtype/osd/voxtype-hal/assets/lens.json`
 
-## Files
+## Hack on it
 
-| File | Purpose |
-|------|---------|
-| `Hal.qml` | The eye. Custom QML, runs trusted inside the voxtype OSD host |
-| `voxtype-osd.toml` | Style package manifest (red palette, custom layout) |
-| `manifest.json` | Omarchy plugin manifest (`io.github.cyprusad.vox-hal`) |
-| `Service.qml` | Omarchy headless service: idempotent auto-apply on shell start |
-| `install.sh` | One-click install with backup |
-| `uninstall.sh` | One-click clean revert |
-| `lens.sh` | Live lens-hue switcher (no restart) |
-| `BarWidget.qml` / `Panel.qml` | Parked color-panel prototype (see Configure) |
-| `LICENSE` | MIT |
+- `Hal.qml` — the eye (QtQuick + Canvas; check with `qmllint Hal.qml`)
+- `EyePanel.qml` / `BarWidget.qml` — bar dot + panel
+- `Service.qml` — headless auto-apply on shell start
+- `voxtype-osd.toml` — style package manifest
+- `manifest.json` — Omarchy plugin manifest (`io.github.cyprusad.vox-hal`)
 
 ## License
 
