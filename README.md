@@ -12,6 +12,8 @@ Everything lives inside the eye — nothing floats over your desktop:
   flips to amber `Transcribing…` while the model works
 - Soft halo glow + dark scrim so it separates from busy windows behind it
 
+![HAL eye OSD](assets/preview.png)
+
 ## Install (one command)
 
 ```bash
