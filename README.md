@@ -10,7 +10,7 @@ desktop:
 - **Pill** = elapsed time while speaking, flips to amber `Transcribing…`
   while the model works
 
-![HAL eye OSD](assets/preview.png)
+![HAL eye OSD](preview.png)
 
 ## Install
 
