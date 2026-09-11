@@ -37,6 +37,8 @@ Press your dictation hotkey and speak. Release, and the pill flips to
 `Transcribing…` until the text lands. Click the `◉` dot in your bar for
 hues, re-apply/revert buttons, and paths.
 
+![HAL eye panel](panel.png)
+
 ## Color
 
 Classic HAL red by default. Change any time — no restart, applies live:
